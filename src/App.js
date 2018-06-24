@@ -80,11 +80,13 @@ class App extends Component {
       <AVIO onStreamChange={this.onStreamChange.bind(this)} audioOnly={this.state.audioOnly} />
       <button onClick={() => this.setState({localMuted: !this.state.localMuted})}>{this.state.localMuted ? 'Unmute': 'Mute'}</button>
       <button onClick={() => this.setState({audioOnly: !this.state.audioOnly})}>{this.state.audioOnly ? 'Enable Video': 'Disable Video'}</button>
-      <Video stream={this.state.stream} muted={this.state.localMuted} />
+      <div className='stage'>
+        <Video stream={this.state.stream} muted={this.state.localMuted} draggable={false} />
+      </div>
       <Broadcaster stream={this.state.stream} feed={this.props.feed} mimeType={mimeType} />
       <div className='peers'>
         {Object.keys(this.state.peers).map((id) => {
-          return <Video key={id} stream={this.state.peers[id]} muted={false} />
+          return <Video key={id} stream={this.state.peers[id]} muted={true} draggable={true} />
         })}
       </div>
     </div>;

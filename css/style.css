@@ -2,15 +2,14 @@ html, body {
   font-family: sans-serif;
 }
 
-.preview {
+.video {
   position: relative;
 }
-.preview video {
-  width: 100%;
-  background: #222;
+.video video {
+  max-width: 100%;
 }
-
-video {
+.stage video {
+  width: 100%;
   background: blue;
 }
 
@@ -38,4 +37,12 @@ video {
   top: 1em;
   right: 1em;
   z-index: 1;
+}
+
+.peers .video {
+  position: fixed;
+  z-index: 10;
+  width: 200px;
+  top: 0;
+  box-shadow: 0px 0px 8px rgba(0,0,0,0.1);
 }

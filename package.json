@@ -1,0 +1,27 @@
+{
+  "name": "hyperchat",
+  "version": "0.0.0",
+  "description": "p2p video chat for dat:// enabled web browsers",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron app.js",
+    "babel": "npx babel index.js --presets=@babel/env,@babel/react --out-file build.js --watch"
+  },
+  "author": "Francis Tseng",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frnsys/hyperchat"
+  },
+  "devDependencies": {
+    "electron": "1.8.4",
+    "@babel/core": "^7.0.0-beta.51",
+    "@babel/preset-env": "^7.0.0-beta.51",
+    "@babel/preset-react": "^7.0.0-beta.51",
+    "@babel/cli": "^7.0.0-beta.51"
+  },
+  "dependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  }
+}

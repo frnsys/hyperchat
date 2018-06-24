@@ -1,0 +1,45 @@
+import {toast} from 'react-toastify';
+import AudioMeter from './AudioMeter';
+import React, {Component} from 'react';
+import {isDeviceId, handleError} from './util';
+
+
+class Video extends Component {
+  constructor(props) {
+    super(props);
+    this.video = React.createRef();
+  }
+
+  setStream(prevStream) {
+    if (prevStream && prevStream !== this.props.stream) {
+      prevStream.getTracks().forEach((track) => track.stop());
+    }
+    if (this.props.stream) {
+      this.video.current.srcObject = this.props.stream;
+    }
+    this.video.current.muted = this.props.muted;
+  }
+
+  componentDidMount() {
+    this.setStream();
+  }
+
+  componentDidUpdate(prevProps) {
+    let prevStream = prevProps ? prevProps.stream : null;
+    this.setStream(prevStream);
+    if (isDeviceId(this.props.audioSink)) {
+      this.video.current.setSinkId(this.props.audioSink).then(() => {
+        toast.success(`Audio output changed to ${this.props.audioSink}`);
+      }).catch(handleError);
+    }
+  }
+
+  render() {
+    return <div className='preview'>
+      <video ref={this.video} autoPlay={true}></video>
+      <AudioMeter muted={this.props.muted} stream={this.props.stream} />
+    </div>;
+  }
+}
+
+export default Video;

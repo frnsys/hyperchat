@@ -15,11 +15,9 @@ class Broadcaster extends Component {
   }
 
   setRecorder(prevStream) {
-    // TODO need to pass mimetype to feed consumers
-    let mimeType = this.props.audioOnly ? 'audio/webm;codecs=opus' : 'video/webm;codecs=vp9,opus';
     if (this.props.stream && this.props.stream !== prevStream) {
       let mediaRecorder = recorder(this.props.stream, {
-        mimeType,
+        mimeType: this.props.mimeType,
         videoBitsPerSecond: videoBitRate,
         audioBitsPerSecond: audioBitRate
       })

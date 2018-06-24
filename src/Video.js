@@ -11,11 +11,16 @@ class Video extends Component {
   }
 
   setStream(prevStream) {
-    if (prevStream && prevStream !== this.props.stream) {
+    let streamChanged = prevStream !== this.props.stream;
+    if (prevStream && streamChanged) {
       prevStream.getTracks().forEach((track) => track.stop());
     }
-    if (this.props.stream) {
-      this.video.current.srcObject = this.props.stream;
+    if (!prevStream || streamChanged) {
+      try {
+        this.video.current.srcObject = this.props.stream;
+      } catch(err) {
+        this.video.current.src = window.URL.createObjectURL(this.props.stream);
+      }
     }
     this.video.current.muted = this.props.muted;
   }
@@ -36,7 +41,7 @@ class Video extends Component {
 
   render() {
     return <div className='preview'>
-      <video ref={this.video} autoPlay={true}></video>
+      <video ref={this.video} autoPlay={true} onError={(e) => console.log(e.target.error)}></video>
       <AudioMeter muted={this.props.muted} stream={this.props.stream} />
     </div>;
   }

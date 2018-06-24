@@ -1,0 +1,21 @@
+.preview {
+  position: relative;
+}
+.preview video {
+  width: 100%;
+}
+
+.audiometer {
+  padding: 0.2em;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.audiometer-tick {
+  background: #31e054;
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  margin-right: 1px;
+  border-radius: 1px;
+}

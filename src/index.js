@@ -1,13 +1,55 @@
 import {render} from 'react-dom';
 import Modal from 'react-modal';
 import React, {Component} from 'react';
-import AudioMeter from './lib/AudioMeter';
+import AudioMeter from './AudioMeter';
 import {ToastContainer, toast} from 'react-toastify';
 import recorder from 'media-recorder-stream';
-import hyperdrive from 'hyperdrive';
+import ram from 'random-access-memory';
+import hypercore from 'hypercore';
 import hyperdiscovery from 'hyperdiscovery';
 
+const feed = hypercore((fname) => {
+  return ram();
+});
 
+feed.on('ready', () => {
+  let id = feed.key.toString('hex');
+  hyperdiscovery(feed, { live: true, port: 3300 })
+  createApp(id);
+});
+
+
+function createApp(id) {
+  let main = document.getElementById('main');
+  Modal.setAppElement(main);
+  render(<App id={id} />, main);
+}
+
+function makeVideoThumb(stream) {
+  let mimeType = 'video/webm;codecs=vp9,opus' // TODO
+  let el_player = document.createElement('video');
+  el_player.autoplay = true;
+  document.querySelector('#container').appendChild(el_player);
+  let mediaSource = new MediaSource()
+
+  el_player.src = window.URL.createObjectURL(mediaSource)
+  el_player.addEventListener('error', (e) => {
+    console.error(e.target.error);
+  });
+
+  mediaSource.addEventListener('sourceopen', function () {
+    let sourceBuffer = mediaSource.addSourceBuffer(mimeType)
+    sourceBuffer.mode = 'sequence'
+    stream.on('data', (data) => {
+      if (!sourceBuffer.updating) {
+        sourceBuffer.appendBuffer(data);
+      }
+    });
+  })
+}
+
+const videoBitRate = 600000;
+const audioBitRate = 32000;
 
 const state = {};
 const devices = {
@@ -63,8 +105,27 @@ class App extends Component {
       audioSrc: true,
       audioSink: true,
       audioOnly: false,
-      localMuted: false,
+      localMuted: true, // TESTING
       settingsOpen: false
+    }
+  }
+
+  onKeyPress(ev) {
+    if (ev.key === 'Enter') {
+      let id = ev.target.value;
+      let feed = hypercore((fname) => {
+        return ram();
+      }, id, {sparse: true});
+      feed.on('ready', () => {
+        console.log(`loaded feed ${id}`);
+        let stream = feed.createReadStream({
+          tail: true,
+          live: true
+        });
+
+        hyperdiscovery(feed, { live: true, port: 3301 })
+        makeVideoThumb(stream);
+      });
     }
   }
 
@@ -81,6 +142,8 @@ class App extends Component {
         <DeviceSelect name='Audio Output' devices={devices.audio.output} onChange={(id) => this.setState({audioSink: id})} />
         <DeviceSelect name='Video Input' devices={devices.video.input} onChange={(id) => this.setState({videoSrc: id})} />
       </Modal>
+      <div className='feed-id'>{this.props.id}</div>
+      <input className='add-feed' name='add-feed' type='text' onKeyPress={this.onKeyPress.bind(this)}></input>
       <button onClick={() => this.setState({settingsOpen: true})}>Settings</button>
       <button onClick={() => this.setState({localMuted: !this.state.localMuted})}>{this.state.localMuted ? 'Unmute': 'Mute'}</button>
       <button onClick={() => this.setState({audioOnly: !this.state.audioOnly})}>{this.state.audioOnly ? 'Enable Video': 'Disable Video'}</button>
@@ -89,12 +152,62 @@ class App extends Component {
   }
 }
 
+class Broadcaster extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      writing: false,
+      recorder: null
+    };
+  }
+
+  setRecorder(prevProps) {
+    let mimeType = this.props.audioOnly ? 'audio/webm;codecs=opus' : 'video/webm;codecs=vp9,opus';
+    if (this.props.stream && this.props.stream !== prevProps.stream) {
+      let mediaRecorder = recorder(this.props.stream, {
+        mimeType,
+        videoBitsPerSecond: videoBitRate,
+        audioBitsPerSecond: audioBitRate
+      })
+
+      if (this.state.recorder) {
+        this.state.recorder.destroy();
+      }
+
+      mediaRecorder.on('data', (data) => {
+        if (!this.state.writing) {
+          this.setState({ writing: true });
+          feed.append(data, (err) => {
+            if (err) console.log('error appending to feed', err);
+            this.setState({ writing: false });
+            console.log(`appended block ${feed.length}`);
+          });
+        }
+      })
+      this.setState({ recorder: mediaRecorder });
+    }
+  }
+
+  componentDidMount() {
+    this.setRecorder();
+  }
+
+  componentDidUpdate(prevProps) {
+    this.setRecorder(prevProps);
+  }
+
+
+  render() {
+    return <div></div>;
+  }
+}
+
+
 class Preview extends Component {
   constructor(props) {
     super(props);
     this.state = {
       stream: null,
-      recorder: null,
       constraints: null
     };
     this.video = React.createRef();
@@ -120,25 +233,9 @@ class Preview extends Component {
       objectChanged(this.state.constraints.video, constraints.video)) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         if (this.state.stream) {
-          console.log('killing old stream');
           this.state.stream.getTracks().forEach((track) => track.stop());
         }
-        console.log(this.state.recorder);
-        if (this.state.recorder) {
-          console.log('killing old recorder');
-          this.state.recorder.destroy();
-        }
-
         this.video.current.srcObject = stream;
-
-        let mimeType = this.props.audioOnly ? 'audio/webm;codecs=opus' : 'video/webm;codecs=vp9,opus';
-        let mediaRecorder = recorder(stream, {
-          mimeType,
-          videoBitsPerSecond: 600000,
-          audioBitsPerSecond: 32000
-        })
-
-        // this.setState({ stream, constraints, recorder: mediaRecorder });
         this.setState({ stream, constraints });
       }).catch(handleError);
     }
@@ -161,11 +258,8 @@ class Preview extends Component {
   render() {
     return <div className='preview'>
       <video ref={this.video} autoPlay={true}></video>
+      <Broadcaster stream={this.state.stream} audioOnly={this.props.audioOnly} />
       <AudioMeter muted={this.props.muted} stream={this.state.stream} />
     </div>;
   }
 }
-
-let main = document.getElementById('main');
-Modal.setAppElement(main);
-render(<App />, main);

@@ -10,6 +10,10 @@ html, body {
   background: #222;
 }
 
+video {
+  background: blue;
+}
+
 .audiometer {
   padding: 0.2em;
   position: absolute;
@@ -27,4 +31,11 @@ html, body {
 }
 .audiometer-muted {
   color: red;
+}
+
+.feed-id {
+  position: fixed;
+  top: 1em;
+  right: 1em;
+  z-index: 1;
 }

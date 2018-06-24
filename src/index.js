@@ -3,6 +3,11 @@ import Modal from 'react-modal';
 import React, {Component} from 'react';
 import AudioMeter from './lib/AudioMeter';
 import {ToastContainer, toast} from 'react-toastify';
+import recorder from 'media-recorder-stream';
+import hyperdrive from 'hyperdrive';
+import hyperdiscovery from 'hyperdiscovery';
+
+
 
 const state = {};
 const devices = {
@@ -33,6 +38,10 @@ function handleError(err) {
 // simple check, not particularly robust though
 function isDeviceId(id) {
   return typeof id === 'string';
+}
+
+function objectChanged(prev, obj) {
+  return JSON.stringify(prev) !== JSON.stringify(obj);
 }
 
 const DeviceSelect = (props) => {
@@ -85,6 +94,7 @@ class Preview extends Component {
     super(props);
     this.state = {
       stream: null,
+      recorder: null,
       constraints: null
     };
     this.video = React.createRef();
@@ -106,14 +116,29 @@ class Preview extends Component {
       constraints.video = false;
     }
     if (!this.state.constraints ||
-      this.state.constraints.audio != constraints.audio ||
-      this.state.constraints.video != constraints.video) {
+      objectChanged(this.state.constraints.audio, constraints.audio) ||
+      objectChanged(this.state.constraints.video, constraints.video)) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         if (this.state.stream) {
           console.log('killing old stream');
           this.state.stream.getTracks().forEach((track) => track.stop());
         }
+        console.log(this.state.recorder);
+        if (this.state.recorder) {
+          console.log('killing old recorder');
+          this.state.recorder.destroy();
+        }
+
         this.video.current.srcObject = stream;
+
+        let mimeType = this.props.audioOnly ? 'audio/webm;codecs=opus' : 'video/webm;codecs=vp9,opus';
+        let mediaRecorder = recorder(stream, {
+          mimeType,
+          videoBitsPerSecond: 600000,
+          audioBitsPerSecond: 32000
+        })
+
+        // this.setState({ stream, constraints, recorder: mediaRecorder });
         this.setState({ stream, constraints });
       }).catch(handleError);
     }
@@ -127,7 +152,9 @@ class Preview extends Component {
   componentDidUpdate(prevProps) {
     this.setStream(prevProps);
     if (isDeviceId(this.props.audioSink)) {
-      this.video.current.setSinkId(this.props.audioSink).catch(handleError);
+      this.video.current.setSinkId(this.props.audioSink).then(() => {
+        toast.success(`Audio output changed to ${this.props.audioSink}`);
+      }).catch(handleError);
     }
   }
 

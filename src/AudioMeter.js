@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 const sampleSize = 128**2;
 const sampleAvgInterval = 16;
-const meterTicks = 6;
+const meterTickSize = 0.05;
 
 class AudioMeter extends Component {
   constructor(props) {
@@ -42,7 +42,7 @@ class AudioMeter extends Component {
   }
 
   render() {
-    let nTicks = Math.round(this.state.rms*meterTicks);
+    let nTicks = Math.round(this.state.rms/meterTickSize);
     return <div className='audiometer'>
       {this.props.muted ?
         <span className='audiometer-muted'>Muted</span> :

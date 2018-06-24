@@ -89,9 +89,11 @@ class AudioMeter extends Component {
   render() {
     let nTicks = Math.round(this.state.rms*meterTicks);
     return <div className='audiometer'>
-      {[...Array(nTicks).keys()].map((k) => {
-        return <span className='audiometer-tick' key={k}></span>
-      })}
+      {this.props.muted ?
+        <span className='audiometer-muted'>Muted</span> :
+        [...Array(nTicks).keys()].map((k) => {
+          return <span className='audiometer-tick' key={k}></span>
+        })}
     </div>
   }
 }
@@ -103,6 +105,7 @@ class App extends Component {
       videoSrc: true,
       audioSrc: true,
       audioSink: true,
+      localMuted: false,
       settingsOpen: false
     }
   }
@@ -121,7 +124,8 @@ class App extends Component {
         <DeviceSelect name='Video Input' devices={devices.video.input} onChange={(id) => this.setState({videoSrc: id})} />
       </Modal>
       <button onClick={() => this.setState({settingsOpen: true})}>Settings</button>
-      <Preview audioSrc={this.state.audioSrc} videoSrc={this.state.videoSrc} audioSink={this.state.audioSink} />
+      <button onClick={() => this.setState({localMuted: !this.state.localMuted})}>{this.state.localMuted ? 'Unmute': 'Mute'}</button>
+      <Preview audioSrc={this.state.audioSrc} videoSrc={this.state.videoSrc} audioSink={this.state.audioSink} muted={this.state.localMuted} />
     </div>;
   }
 }
@@ -158,6 +162,7 @@ class Preview extends Component {
         this.setState({ stream });
       }).catch(handleError);
     }
+    this.video.current.muted = this.props.muted;
   }
 
   componentDidMount() {
@@ -174,7 +179,7 @@ class Preview extends Component {
   render() {
     return <div className='preview'>
       <video ref={this.video} autoPlay={true}></video>
-      <AudioMeter stream={this.state.stream} />
+      <AudioMeter muted={this.props.muted} stream={this.state.stream} />
     </div>;
   }
 }

@@ -1,3 +1,7 @@
+html, body {
+  font-family: sans-serif;
+}
+
 .preview {
   position: relative;
 }
@@ -10,6 +14,7 @@
   position: absolute;
   bottom: 0;
   right: 0;
+  text-transform: uppercase;
 }
 .audiometer-tick {
   background: #31e054;
@@ -18,4 +23,7 @@
   height: 12px;
   margin-right: 1px;
   border-radius: 1px;
+}
+.audiometer-muted {
+  color: red;
 }

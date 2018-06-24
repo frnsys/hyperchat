@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "electron app.js",
-    "babel": "npx babel index.js --presets=@babel/env,@babel/react --out-file build.js --watch"
+    "babel": "npx babel src --presets=@babel/env,@babel/react --out-dir lib --watch"
   },
   "author": "Francis Tseng",
   "license": "MIT",
@@ -21,6 +21,8 @@
     "@babel/cli": "^7.0.0-beta.51"
   },
   "dependencies": {
+    "hyperdiscovery": "^7.1.1",
+    "hyperdrive": "^9.14.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-modal": "^3.3.2",

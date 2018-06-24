@@ -1,6 +1,6 @@
-import {toast} from 'react-toastify';
 import AudioMeter from './AudioMeter';
 import React, {Component} from 'react';
+import {notify} from 'react-notify-toast';
 import {isDeviceId, handleError} from './util';
 
 let focusedVideo = null;
@@ -47,7 +47,7 @@ class Video extends Component {
     this.setStream(prevStream);
     if (isDeviceId(this.props.audioSink)) {
       this.video.current.setSinkId(this.props.audioSink).then(() => {
-        toast.success(`Audio output changed to ${this.props.audioSink}`);
+        notify.show(`Audio output changed to ${this.props.audioSink}`);
       }).catch(handleError);
     }
   }

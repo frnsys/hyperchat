@@ -1,7 +1,7 @@
-import {toast} from 'react-toastify';
+import {notify} from 'react-notify-toast';
 
 function handleError(err) {
-  toast.error(err.message);
+  notify.show(err.message);
 }
 
 // simple check, not particularly robust though

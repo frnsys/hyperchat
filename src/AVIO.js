@@ -88,10 +88,11 @@ class AVIO extends Component {
   }
 
   render() {
-    return <div>
+    return <span>
       <button onClick={() => this.setState({open: true})}>A/V</button>
       <Modal
         className='modal'
+        overlayClassName='modal-overlay'
         isOpen={this.state.open}
         shouldCloseOnOverlayClick={true}
         onRequestClose={() => this.setState({open: false})}>
@@ -100,7 +101,7 @@ class AVIO extends Component {
         <DeviceSelect name='Audio Output' devices={devices.audio.output} onChange={(id) => this.setState({audioSink: id})} />
         <DeviceSelect name='Video Input' devices={devices.video.input} onChange={(id) => this.setState({videoSrc: id})} />
       </Modal>
-    </div>
+    </span>
   }
 }
 

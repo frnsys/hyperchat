@@ -4,8 +4,8 @@
   "description": "p2p video chat for dat:// enabled web browsers",
   "main": "index.js",
   "scripts": {
-    "start": "electron app.js",
-    "babel": "npx babel src --presets=@babel/env,@babel/react --out-dir lib --watch"
+    "start": "webpack --watch --watch-poll --progress",
+    "compile": "webpack --progress"
   },
   "author": "Francis Tseng",
   "license": "MIT",
@@ -14,18 +14,28 @@
     "url": "https://github.com/frnsys/hyperchat"
   },
   "devDependencies": {
-    "electron": "1.8.4",
     "@babel/core": "^7.0.0-beta.51",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.51",
+    "@babel/polyfill": "^7.0.0-beta.51",
     "@babel/preset-env": "^7.0.0-beta.51",
     "@babel/preset-react": "^7.0.0-beta.51",
-    "@babel/cli": "^7.0.0-beta.51"
+    "babel-loader": "^8.0.0-beta.0",
+    "css-loader": "^0.28.4",
+    "electron": "^2.0.3",
+    "extract-text-webpack-plugin": "^2.1.2",
+    "sass-loader": "^4.0.0",
+    "style-loader": "^0.18.2",
+    "url-loader": "^0.5.9",
+    "webpack": "^2.6.1"
   },
   "dependencies": {
+    "hypercore": "^6.16.0",
     "hyperdiscovery": "^7.1.1",
-    "hyperdrive": "^9.14.0",
+    "media-recorder-stream": "^2.1.1",
+    "random-access-memory": "^3.0.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-modal": "^3.3.2",
-    "react-toastify": "^3.4.3"
+    "react-notify-toast": "^0.5.0"
   }
 }

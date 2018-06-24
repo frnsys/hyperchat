@@ -22,3 +22,4 @@ app.on('ready', function () {
 
   win.webContents.openDevTools()
 })
+

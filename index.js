@@ -105,6 +105,7 @@ class App extends Component {
       videoSrc: true,
       audioSrc: true,
       audioSink: true,
+      audioOnly: false,
       localMuted: false,
       settingsOpen: false
     }
@@ -125,7 +126,8 @@ class App extends Component {
       </Modal>
       <button onClick={() => this.setState({settingsOpen: true})}>Settings</button>
       <button onClick={() => this.setState({localMuted: !this.state.localMuted})}>{this.state.localMuted ? 'Unmute': 'Mute'}</button>
-      <Preview audioSrc={this.state.audioSrc} videoSrc={this.state.videoSrc} audioSink={this.state.audioSink} muted={this.state.localMuted} />
+      <button onClick={() => this.setState({audioOnly: !this.state.audioOnly})}>{this.state.audioOnly ? 'Enable Video': 'Disable Video'}</button>
+      <Preview audioSrc={this.state.audioSrc} videoSrc={this.state.videoSrc} audioSink={this.state.audioSink} muted={this.state.localMuted} audioOnly={this.state.audioOnly} />
     </div>;
   }
 }
@@ -134,32 +136,37 @@ class Preview extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      stream: null
+      stream: null,
+      constraints: null
     };
     this.video = React.createRef();
   }
 
   setStream(prevProps) {
     // only re-build stream when necessary
-    if (!prevProps || prevProps.videoSrc != this.props.videoSrc || prevProps.audioSrc != this.props.audioSrc) {
-      let constraints = {
-        video: this.props.videoSrc,
-        audio: this.props.audioSrc
-      };
-      if (isDeviceId(this.props.audioSrc)) {
-        constraints.audio = {deviceId: {exact: this.props.audioSrc}};
-      }
-      if (isDeviceId(this.props.videoSrc)) {
-        constraints.video = {deviceId: {exact: this.props.videoSrc}};
-      }
-
+    let constraints = {
+      video: this.props.videoSrc,
+      audio: this.props.audioSrc
+    };
+    if (isDeviceId(this.props.audioSrc)) {
+      constraints.audio = {deviceId: {exact: this.props.audioSrc}};
+    }
+    if (isDeviceId(this.props.videoSrc)) {
+      constraints.video = {deviceId: {exact: this.props.videoSrc}};
+    }
+    if (this.props.audioOnly) {
+      constraints.video = false;
+    }
+    if (!this.state.constraints ||
+      this.state.constraints.audio != constraints.audio ||
+      this.state.constraints.video != constraints.video) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         if (this.state.stream) {
           console.log('killing old stream');
           this.state.stream.getTracks().forEach((track) => track.stop());
         }
         this.video.current.srcObject = stream;
-        this.setState({ stream });
+        this.setState({ stream, constraints });
       }).catch(handleError);
     }
     this.video.current.muted = this.props.muted;

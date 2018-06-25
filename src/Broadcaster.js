@@ -9,7 +9,6 @@ class Broadcaster extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      writing: false,
       recorder: null
     };
   }
@@ -17,6 +16,7 @@ class Broadcaster extends Component {
   setRecorder(prevStream) {
     if (this.props.stream && this.props.stream !== prevStream) {
       let mediaRecorder = recorder(this.props.stream, {
+        interval: 1000,
         mimeType: this.props.mimeType,
         videoBitsPerSecond: videoBitRate,
         audioBitsPerSecond: audioBitRate
@@ -29,13 +29,9 @@ class Broadcaster extends Component {
 
       // stream to feed
       mediaRecorder.on('data', (data) => {
-        if (!this.state.writing) {
-          this.setState({ writing: true });
-          this.props.feed.append(data, (err) => {
-            if (err) console.log('error appending to feed', err);
-            this.setState({ writing: false });
-          });
-        }
+        this.props.feed.append(data, (err) => {
+          if (err) console.log('error appending to feed', err);
+        });
       })
 
       this.setState({ recorder: mediaRecorder });

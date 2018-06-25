@@ -67,7 +67,7 @@ class Video extends Component {
   }
 
   render() {
-    return <div className='video'
+    return <div className={`video ${this.props.draggable && 'video-draggable'}`}
       onMouseDown={this.onMouseDown.bind(this)}
       onMouseUp={() => focusedVideo = null}
       style={{top: `${this.state.top}px`, left: `${this.state.left}px`}}>

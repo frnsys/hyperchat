@@ -10,6 +10,10 @@ html, body {
   max-width: 100%;
   display: block;
 }
+.video-draggable {
+  cursor: -webkit-grab;
+}
+
 .stage {
   position: absolute;
   left: 0;

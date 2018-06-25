@@ -4,8 +4,8 @@
   "description": "p2p video chat for dat:// enabled web browsers",
   "main": "index.js",
   "scripts": {
-    "start": "webpack --watch --watch-poll --progress",
-    "compile": "webpack --progress"
+    "start": "electron app.js",
+    "compile": "webpack --watch --progress"
   },
   "author": "Francis Tseng",
   "license": "MIT",
